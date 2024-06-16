@@ -42,6 +42,13 @@ default:
 }
 
 @MainActor func run(source: String) throws {
+//    var scanner = LoxScanner()
+//    tokens = scanner.scanTokens()
+//    
+//    // For now, just print the tokens
+//    for token in tokens {
+//        print(token)
+//    }
 }
 
 func error(line: Int, message: String) throws {
