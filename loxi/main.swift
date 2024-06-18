@@ -10,10 +10,10 @@ import Foundation
 var hadError = false
 
 switch CommandLine.arguments.count {
-case 0:
-    try runPrompt()
 case 1:
-    try runFile(path: CommandLine.arguments[0])
+    try runPrompt()
+case 2:
+    try runFile(path: CommandLine.arguments[1])
 default:
     print("Usage: loxi [script]")
     exit(64)
@@ -42,13 +42,13 @@ default:
 }
 
 @MainActor func run(source: String) throws {
-//    var scanner = LoxScanner()
-//    tokens = scanner.scanTokens()
-//    
-//    // For now, just print the tokens
-//    for token in tokens {
-//        print(token)
-//    }
+    var scanner = Scanner(source: source)
+    try scanner.scanTokens()
+    
+    // For now, just print the tokens
+    for token in scanner.tokens {
+        print(token)
+    }
 }
 
 func error(line: Int, message: String) throws {

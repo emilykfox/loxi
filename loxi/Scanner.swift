@@ -73,7 +73,7 @@ struct Token {
 struct Scanner {
     let source: String
     
-    var tokens: Array<Token> = []
+    private(set) var tokens: Array<Token> = []
     
     // start and current will probably change types to directly index into source
     // (can I do that?)
@@ -95,7 +95,7 @@ struct Scanner {
             try scanToken()
         }
         
-        tokens.append(Token(type: .EOF, lexeme: source[current...current], literal: nil, line: line))
+        tokens.append(Token(type: .EOF, lexeme: source[current..<current], literal: nil, line: line))
     }
     
     var atEnd: Bool {
@@ -105,8 +105,8 @@ struct Scanner {
     }
     
     private mutating func scanToken() throws {
-        let c: Character = advance()
-        switch c {
+        let character: Character = advance()
+        switch character {
         case "(": addToken(.LeftParen)
         case ")": addToken(.RightParen)
         case "{": addToken(.LeftBrace)
@@ -160,6 +160,8 @@ struct Scanner {
         case "\n":
             line += 1
         case "\"": try scanString()
+        case let character where isDigit(character): scanNumber()
+        case let character where isAlpha(character): scanIdentifier()
         default: try error(line: line, message: "Unexpected character.")
         }
                 
@@ -188,8 +190,16 @@ struct Scanner {
         }
     }
     
+    private func peekNext() -> Character? {
+        if current == source.endIndex || source.index(after: current) == source.endIndex {
+            nil
+        } else {
+            source[source.index(after: current)]
+        }
+    }
+    
     private mutating func addToken(_ type: TokenType, literal: Literal? = nil) {
-        tokens.append(Token(type: type, lexeme: source[start...current], literal: literal, line: line))
+        tokens.append(Token(type: type, lexeme: source[start..<current], literal: literal, line: line))
     }
     
     private mutating func scanString() throws {
@@ -208,7 +218,67 @@ struct Scanner {
         // The closing "
         _ = advance()
         
-        let stringLiteral = String(source[source.index(after: start)...source.index(before: current)])
+        let stringLiteral = String(source[source.index(after: start)..<source.index(before: current)])
         addToken(.String, literal: .String(stringLiteral))
+    }
+    
+    private mutating func scanNumber() {
+        while let character = peek(), isDigit(character) {
+            _ = advance()
+        }
+        
+        // Look for a fractional part
+        if let character = peek(), character == ".", let nextCharacter = peekNext(), isDigit(nextCharacter) {
+            // Consume the "."
+            _ = advance()
+            
+            while let character = peek(), isDigit(character) {
+                _ = advance()
+            }
+        }
+        
+        let numberLiteral = Double(source[start..<current])!
+        addToken(.Number, literal: .Number(numberLiteral))
+    }
+    
+    private mutating func scanIdentifier() {
+        while let character = peek(), isAlphaNumeric(character) {
+            _ = advance()
+        }
+        
+        let tokenType: TokenType = switch source[start..<current] {
+        case "and": .And
+        case "class": .Class
+        case "else": .Else
+        case "false": .False
+        case "for": .For
+        case "fun": .Fun
+        case "if": .If
+        case "nil": .Nil
+        case "or": .Or
+        case "print": .Print
+        case "return": .Return
+        case "super": .Super
+        case "this": .This
+        case "true": .True
+        case "var": .Var
+        case "while": .While
+        default: .Identifier
+        }
+        addToken(tokenType)
+    }
+    
+    private func isDigit(_ character: Character) -> Bool {
+        character >= "0" && character <= "9"
+    }
+    
+    private func isAlpha(_ character: Character) -> Bool {
+        (character >= "a" && character <= "z") ||
+        (character >= "A" && character <= "Z") ||
+        (character == "_")
+    }
+    
+    private func isAlphaNumeric(_ character: Character) -> Bool {
+        isAlpha(character) || isDigit(character)
     }
 }
