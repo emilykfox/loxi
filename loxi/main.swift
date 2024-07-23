@@ -21,7 +21,7 @@ default:
 
 @MainActor func runFile(path: String) throws {
     try run(source: String(contentsOfFile: path, encoding: .utf8))
-    
+
     // Indicate an error in the exit code
     if hadError {
         exit(65)
@@ -44,7 +44,7 @@ default:
 @MainActor func run(source: String) throws {
     var scanner = Scanner(source: source)
     try scanner.scanTokens()
-    
+
     // For now, just print the tokens
     for token in scanner.tokens {
         print(token)
@@ -56,5 +56,7 @@ func error(line: Int, message: String) throws {
 }
 
 func report(line: Int, where whereString: String, message: String) throws {
-    try FileHandle.standardError.write(contentsOf: "[line \(line)] Error\(whereString): \(message)".data(using: .utf8)!)
+    try FileHandle.standardError.write(
+        contentsOf: "[line \(line)] Error\(whereString): \(message)".data(
+            using: .utf8)!)
 }
