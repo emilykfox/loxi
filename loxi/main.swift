@@ -7,6 +7,11 @@
 
 import Foundation
 
+// Little expression tree printing test
+let testExpression = Expr.binary(left: .unary(operator: Token(type: .minus, lexeme: "-", literal: nil, line: 1), right: .literal(.number(123))), operator: Token(type: .star, lexeme: "*", literal: nil, line: 1), right: .grouping(.literal(.number(45.67))))
+
+print("test expression: \(testExpression)")
+
 var hadError = false
 
 switch CommandLine.arguments.count {
