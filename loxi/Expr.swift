@@ -10,7 +10,7 @@ import Foundation
 enum Expr {
     indirect case binary(left: Expr, operator: Token, right: Expr)
     indirect case grouping(Expr)
-    case literal(Literal?)
+    case literal(Literal)
     indirect case unary(operator: Token, right: Expr)
 }
 
@@ -22,16 +22,12 @@ extension Expr: CustomStringConvertible {
         case let .grouping(expr):
             parenthesize(name: "group", exprs: expr)
         case let .literal(literal):
-            if let literal {
-                String(describing: literal)
-            } else {
-                "nil"
-            }
+            String(describing: literal)
         case let .unary(op, right):
             parenthesize(name: op.lexeme, exprs: right)
         }
     }
-    
+
     func parenthesize(name: Substring, exprs: Expr...) -> String {
         var string = "("
         string.append(contentsOf: name)
@@ -40,7 +36,7 @@ extension Expr: CustomStringConvertible {
             string.append(String(describing: expr))
         }
         string.append(")")
-        
+
         return string
     }
 }

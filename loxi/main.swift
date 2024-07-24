@@ -8,7 +8,12 @@
 import Foundation
 
 // Little expression tree printing test
-let testExpression = Expr.binary(left: .unary(operator: Token(type: .minus, lexeme: "-", literal: nil, line: 1), right: .literal(.number(123))), operator: Token(type: .star, lexeme: "*", literal: nil, line: 1), right: .grouping(.literal(.number(45.67))))
+let testExpression = Expr.binary(
+    left: .unary(
+        operator: Token(type: .minus, lexeme: "-", literal: nil, line: 1),
+        right: .literal(.number(123))),
+    operator: Token(type: .star, lexeme: "*", literal: nil, line: 1),
+    right: .grouping(.literal(.number(45.67))))
 
 print("test expression: \(testExpression)")
 
@@ -48,19 +53,38 @@ default:
 
 @MainActor func run(source: String) throws {
     var scanner = Scanner(source: source)
-    try scanner.scanTokens()
+    let tokens = try scanner.scanTokens()
 
-    // For now, just print the tokens
-    for token in scanner.tokens {
-        print(token)
+    var parser = Parser(tokens: tokens)
+    let expression = parser.parse()
+
+    // Stop if there was a syntax error.
+    if hadError {
+        return
     }
+
+    print(expression!)
 }
 
+@MainActor
 func error(line: Int, message: String) throws {
     try report(line: line, where: "", message: message)
 }
 
+@MainActor
+func error(token: Token, message: String) throws {
+    let whereString =
+        if token.type == .eof {
+            " at end"
+        } else {
+            " at '\(token.lexeme)'"
+        }
+    try report(line: token.line, where: whereString, message: message)
+}
+
+@MainActor
 func report(line: Int, where whereString: String, message: String) throws {
+    hadError = true
     try FileHandle.standardError.write(
         contentsOf: "[line \(line)] Error\(whereString): \(message)".data(
             using: .utf8)!)

@@ -20,7 +20,7 @@ enum TokenType {
     case semicolon
     case slash
     case star
-    
+
     // One or two character tokens
     case bang
     case bangEqual
@@ -30,13 +30,14 @@ enum TokenType {
     case greaterEqual
     case less
     case lessEqual
-    
+
     // Literals
     case identifier
     case string
     case number
-    
+
     // Keywords
+    // (should false, nil, and true actually be special tokens?)
     case and
     case `class`
     case `else`
@@ -53,7 +54,7 @@ enum TokenType {
     case `true`
     case `var`
     case `while`
-    
+
     case eof
 }
 

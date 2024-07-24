@@ -7,10 +7,11 @@
 
 import Foundation
 
+@MainActor
 struct Scanner {
     let source: String
 
-    private(set) var tokens: [Token] = []
+    private var tokens: [Token] = []
 
     // start and current will probably change types to directly index into source
     // (can I do that?)
@@ -25,7 +26,7 @@ struct Scanner {
         current = source.startIndex
     }
 
-    mutating func scanTokens() throws {
+    mutating func scanTokens() throws -> [Token] {
         while !atEnd {
             // We are at the beginning of the next lexeme
             start = current
@@ -36,9 +37,11 @@ struct Scanner {
             Token(
                 type: .eof, lexeme: source[current..<current], literal: nil,
                 line: line))
+
+        return tokens
     }
 
-    var atEnd: Bool {
+    private var atEnd: Bool {
         current == source.endIndex
     }
 
